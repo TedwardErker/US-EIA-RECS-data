@@ -164,13 +164,17 @@ To get a properly weighted 2d density surface using ggplot2, I need to
 duplicate my rows according to NWEIGHT
 #+begin_src R
 d2 <- select(d, CDD30YR, HDD30YR, NWEIGHT, DIVISION)
+
+d2 <- d2 %>% mutate(DIVISION = plyr::mapvalues(DIVISION, from = 1:10, to = c("New England", "Middle Atlantic", "East North Central", "West North Central", "South Atlantic", "East South Central", "West South Central", "Mountain North", "Mountain South", "Pacific")))
+
 d3 <- d2 %>% uncount(NWEIGHT/100)
 #+end_src
 
 #+RESULTS:
 
 #+begin_src R :exports results :results graphics :file figs/HDDvCDD.png
-  ggplot(d, aes(x = HDD30YR, y = CDD30YR, size = NWEIGHT)) + geom_point(alpha = .5)
+    ggplot(d2, aes(x = HDD30YR, y = CDD30YR, size = NWEIGHT, color = DIVISION)) + 
+        geom_convexhull(aes(fill = DIVISION), alpha = 0, size = 1)
 #+end_src
 
 #+RESULTS:
@@ -186,3 +190,17 @@ d3 <- d2 %>% uncount(NWEIGHT/100)
 [[file:figs/HDDvCDD_density.png]]
 
 I need to annotate the cities on the above figure.  they clearly appear.
+
+#+begin_src R :exports results :results graphics :file figs/HDDvCDD_density_division.png
+  ggplot(d3, aes(x = HDD30YR, y = CDD30YR)) +
+      geom_density2d() +
+        geom_convexhull(aes(color = DIVISION, fill = DIVISION), alpha = 0, size = 1)
+#+end_src
+
+#+RESULTS:
+
+[[file:figs/HDDvCDD_density_division.png]]
+
+Division may not be so useful.  It's a bit of a clutter mess.
+
+Just identifying cities might be best.
