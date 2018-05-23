@@ -1,0 +1,50 @@
+#+Title: 2015 Residential Energy Consumption Survey (RECS) Data
+
+Data downloaded from:
+https://www.eia.gov/consumption/residential/data/2015/index.php?view=microdata
+
+* Information from EIA website
+Release date: October 2017
+
+Text from webpage:
+#+BEGIN_QUOTE
+Microdata
+
+This preliminary 2015 version represents the 14th iteration of the
+RECS program. First conducted in 1978, the Residential Energy
+Consumption Survey is a national sample survey that collects
+energy-related data for housing units occupied as a primary residence
+and the households that live in them. Data were collected from more
+than 5,600 households selected at random using a complex multistage,
+area-probability sample design. The sample represents 118.2 million
+U.S. households. The 1st version of the 2015 RECS microdata file,
+released in April 2017, reflected preliminary household
+characteristics data. This file was updated in October 2017
+(Version 2) to include additional square footage and household energy
+insecurity data. EIA expects to release a final 2015 RECS microdata
+file (Version 3) in Spring 2018 that will include final household
+characteristics data, as well as final consumption and expenditures
+data.
+
+
+Data are available in two formats: a comma delimited file (CSV) and a
+SAS data file. The "Variable and response codebook" file contains
+descriptive labels for variables, variable type, and descriptions of
+the response codes.
+
+
+Users are strongly encouraged to read [[https://www.eia.gov/consumption/residential/data/2015/pdf/microdata.pdf][Using the 2015 microdata file to
+compute estimates and standard errors (RSEs)]]. 
+
+#+END_QUOTE
+
+* Download Data
+#+BEGIN_SRC sh
+wget -O Using2015Microdatafile.pdf https://www.eia.gov/consumption/residential/data/2015/pdf/microdata.pdf
+wget -O recs2015_data.csv https://www.eia.gov/consumption/residential/data/2015/csv/recs2015_public_v2.csv
+wget -O recs2015_metadata.xlsx https://www.eia.gov/consumption/residential/data/2015/xls/codebook2015_public_v2.xlsx
+#+END_SRC
+
+#+RESULTS:
+
+* READ Using2015Microdatafile.pdf BEFORE USE!
