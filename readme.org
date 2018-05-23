@@ -3,7 +3,7 @@
 Data downloaded from:
 https://www.eia.gov/consumption/residential/data/2015/index.php?view=microdata
 
-* Information from EIA website
+** Information from EIA website
 Release date: October 2017
 
 Text from webpage:
@@ -38,7 +38,7 @@ compute estimates and standard errors (RSEs)]].
 
 #+END_QUOTE
 
-* Download Data
+** Download Data
 #+BEGIN_SRC sh
 wget -O Using2015Microdatafile.pdf https://www.eia.gov/consumption/residential/data/2015/pdf/microdata.pdf
 wget -O recs2015_data.csv https://www.eia.gov/consumption/residential/data/2015/csv/recs2015_public_v2.csv
@@ -47,4 +47,4 @@ wget -O recs2015_metadata.xlsx https://www.eia.gov/consumption/residential/data/
 
 #+RESULTS:
 
-* READ Using2015Microdatafile.pdf BEFORE USE!
+** READ Using2015Microdatafile.pdf BEFORE USE!
