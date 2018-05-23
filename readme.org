@@ -47,4 +47,10 @@ wget -O recs2015_metadata.xlsx https://www.eia.gov/consumption/residential/data/
 
 #+RESULTS:
 
+#+BEGIN_SRC sh
+wget https://www.eia.gov/consumption/residential/reports/images/climatezone_eere-lg.jpg
+#+END_SRC
+
+#+RESULTS:
+
 ** READ Using2015Microdatafile.pdf BEFORE USE!
