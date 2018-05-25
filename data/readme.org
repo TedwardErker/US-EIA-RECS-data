@@ -1,0 +1,2 @@
+cities_hdd_cdd.csv is from climate_normals project.
+/home/erker/data/climate_normals_1981-2010/data/cities_hdd_cdd.csv

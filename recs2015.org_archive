@@ -1,0 +1,335 @@
+#    -*- mode: org -*-
+
+
+Archived entries from file /home/erker/data/US-EIA-ResidentialEnergyConsumptionSurvey/recs2015.org
+
+
+* Single Family detached house
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2018-05-25 Fri 11:16
+  :ARCHIVE_FILE: ~/data/US-EIA-ResidentialEnergyConsumptionSurvey/recs2015.org
+  :ARCHIVE_CATEGORY: recs2015
+  :END:
+
+From metadata:
+
+TYPEHUQ = Type of housing unit; value of 2 is Single-family detached
+house
+
+This is my target population for my study, so I should summarize
+energy use for these households only.
+
+
+DIVISION
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+New England
+Middle Atlantic
+East North Central
+West North Central
+South Atlantic
+East South Central
+West South Central
+Mountain North
+Mountain South
+Pacific
+
+
+Heating Degree Days (HDD):  A measure of how cold a location is over a
+period of time relative to a base temperature, most commonly specified
+as 65 degrees Fahrenheit. The measure is computed for each day by
+subtracting the average of the day's high and low temperatures from
+the base temperature (65 degrees), with negative values set equal to
+zero. Each day's heating degree days are summed to create a heating
+degree day measure for a specified reference period. Heating degree
+days are used in energy analysis as an indicator of space heating
+energy requirements or use.
+
+
+#+begin_src R
+library(tidyverse)
+library(ggplot2)
+library(ggConvexHull)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R
+d <- read.csv("data/recs2015_data.csv")
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R
+  d <- d %>%
+    filter(TYPEHUQ == 2)
+  str(d)
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+'data.frame':	3752 obs. of  576 variables:
+ $ DOEID             : int  10001 10002 10003 10004 10005 10008 10009 10010 10011 10012 ...
+ $ REGIONC           : int  4 3 3 2 1 2 1 3 1 2 ...
+ $ DIVISION          : int  10 7 6 4 2 3 2 7 1 4 ...
+ $ METROMICRO        : Factor w/ 3 levels "METRO","MICRO",..: 1 3 1 2 1 1 1 1 1 1 ...
+ $ UATYP10           : Factor w/ 3 levels "C","R","U": 3 2 3 1 3 2 3 3 3 3 ...
+ $ CDD30YR           : int  1321 2406 1867 1417 842 568 842 3132 582 1389 ...
+ $ CDD65             : int  1768 2795 2235 1374 993 673 1083 3390 771 1706 ...
+ $ CLIMATE_REGION_PUB: Factor w/ 6 levels "","Cold/Very Cold",..: 3 4 6 6 2 2 2 4 2 6 ...
+ $ HDD30YR           : int  2645 2231 2782 4005 5502 7332 5502 1494 6362 4578 ...
+ $ HDD65             : int  2031 1915 2263 3754 5401 6560 5301 1400 6400 4007 ...
+ $ TYPEHUQ           : int  2 2 2 2 2 2 2 2 2 2 ...
+ $ ZTYPEHUQ          : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ CELLAR            : int  0 0 1 1 1 1 0 0 1 0 ...
+ $ ZCELLAR           : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ BASEFIN           : int  -2 -2 1 1 0 1 -2 -2 0 -2 ...
+ $ ZBASEFIN          : int  -2 -2 0 0 0 0 -2 -2 0 -2 ...
+ $ ATTIC             : int  0 0 0 0 1 1 0 1 0 0 ...
+ $ ZATTIC            : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ ATTICFIN          : int  -2 -2 -2 -2 0 1 -2 0 -2 -2 ...
+ $ ZATTICFIN         : int  -2 -2 -2 -2 0 0 -2 0 -2 -2 ...
+ $ STORIES           : int  20 10 10 10 20 10 20 10 20 10 ...
+ $ ZSTORIES          : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ PRKGPLC1          : int  1 0 0 1 1 1 1 1 0 0 ...
+ $ ZPRKGPLC1         : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ SIZEOFGARAGE      : int  2 -2 -2 2 1 1 2 2 -2 -2 ...
+ $ ZSIZEOFGARAGE     : int  0 -2 -2 0 0 0 0 0 -2 -2 ...
+ $ KOWNRENT          : int  1 1 1 1 1 1 1 2 1 2 ...
+ $ ZKOWNRENT         : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ YEARMADERANGE     : int  7 5 4 2 4 4 5 2 3 1 ...
+ $ ZYEARMADERANGE    : int  0 0 0 0 0 0 0 0 0 1 ...
+ $ OCCUPYYRANGE      : int  8 6 7 7 8 6 6 7 7 8 ...
+ $ ZOCCUPYYRANGE     : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ STUDIO            : int  -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 ...
+ $ ZSTUDIO           : int  -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 ...
+ $ BEDROOMS          : int  3 2 4 3 3 3 4 3 3 1 ...
+ $ ZBEDROOMS         : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ NCOMBATH          : int  2 1 2 2 2 1 2 2 1 1 ...
+ $ ZNCOMBATH         : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ NHAFBATH          : int  1 0 0 0 0 0 0 0 1 0 ...
+ $ ZNHAFBATH         : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ OTHROOMS          : int  4 2 5 4 3 2 5 3 2 3 ...
+ $ ZOTHROOMS         : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ TOTROOMS          : int  7 4 9 7 6 5 9 6 5 4 ...
+ $ ZTOTROOMS         : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ WALLTYPE          : int  4 3 2 3 1 3 3 1 3 4 ...
+ $ ZWALLTYPE         : int  0 0 0 0 0 0 0 1 0 0 ...
+ $ ROOFTYPE          : int  1 3 5 5 5 5 5 5 5 5 ...
+ $ ZROOFTYPE         : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ HIGHCEIL          : int  1 0 0 1 0 0 0 0 0 0 ...
+ $ ZHIGHCEIL         : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ DOOR1SUM          : int  2 0 1 4 1 1 1 0 1 0 ...
+ $ ZDOOR1SUM         : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ WINDOWS           : int  41 20 41 42 30 30 41 42 41 30 ...
+ $ ZWINDOWS          : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ TYPEGLASS         : int  2 1 1 2 1 2 2 1 2 1 ...
+ $ ZTYPEGLASS        : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ WINFRAME          : int  2 2 1 2 3 1 3 1 1 1 ...
+ $ ZWINFRAME         : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ ADQINSUL          : int  2 2 2 2 2 2 2 3 2 3 ...
+ $ ZADQINSUL         : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ DRAFTY            : int  4 4 3 4 4 3 3 3 3 3 ...
+ $ ZDRAFTY           : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ UGASHERE          : int  1 1 1 0 1 1 0 1 0 1 ...
+ $ ZUGASHERE         : int  0 0 0 0 0 0 0 0 1 0 ...
+ $ SWIMPOOL          : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ ZSWIMPOOL         : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ MONPOOL           : int  -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 ...
+ $ ZMONPOOL          : int  -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 ...
+ $ POOL              : int  -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 ...
+ $ ZPOOL             : int  -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 ...
+ $ FUELPOOL          : int  -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 ...
+ $ ZFUELPOOL         : int  -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 ...
+ $ RECBATH           : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ ZRECBATH          : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ MONTUB            : int  -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 ...
+ $ ZMONTUB           : int  -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 ...
+ $ FUELTUB           : int  -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 ...
+ $ ZFUELTUB          : int  -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 ...
+ $ OUTLET            : int  1 0 1 1 1 1 1 1 0 1 ...
+ $ ZOUTLET           : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ ALTFUELPEV        : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ ZALTFUELPEV       : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ BACKUP            : int  1 0 0 0 0 0 0 0 1 0 ...
+ $ ZBACKUP           : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ SOLAR             : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ NUMFRIG           : int  1 1 2 2 2 1 2 1 2 1 ...
+ $ ZNUMFRIG          : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ SIZRFRI1          : int  3 4 4 3 3 3 4 4 3 3 ...
+ $ ZSIZRFRI1         : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ TYPERFR1          : int  5 21 21 22 23 21 23 21 22 22 ...
+ $ ZTYPERFR1         : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ AGERFRI1          : int  3 1 41 3 1 42 3 1 2 3 ...
+ $ ZAGERFRI1         : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ ICE               : int  0 1 1 0 0 0 0 1 0 0 ...
+ $ ZICE              : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ SIZRFRI2          : int  -2 -2 4 1 2 -2 3 -2 3 -2 ...
+ $ ZSIZRFRI2         : int  -2 -2 0 0 0 -2 1 -2 0 -2 ...
+ $ TYPERFR2          : int  -2 -2 21 -2 1 -2 21 -2 22 -2 ...
+ $ ZTYPERFR2         : int  -2 -2 0 -2 0 -2 1 -2 0 -2 ...
+  [list output truncated]
+#+end_example
+
+a bit of a hack.
+To get a properly weighted 2d density surface using ggplot2, I need to
+duplicate my rows according to NWEIGHT
+#+begin_src R
+d2 <- select(d, CDD30YR, HDD30YR, NWEIGHT, DIVISION)
+
+d2 <- d2 %>% mutate(DIVISION = plyr::mapvalues(DIVISION, from = 1:10, to = c("New England", "Middle Atlantic", "East North Central", "West North Central", "South Atlantic", "East South Central", "West South Central", "Mountain North", "Mountain South", "Pacific")))
+
+d3 <- d2 %>% uncount(NWEIGHT/100)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R :exports results :results graphics :file figs/HDDvCDD.png
+    ggplot(d2, aes(x = HDD30YR, y = CDD30YR, size = NWEIGHT, color = DIVISION)) + 
+        geom_convexhull(aes(fill = DIVISION), alpha = 0, size = 1)
+#+end_src
+
+#+RESULTS:
+[[file:figs/HDDvCDD.png]]
+
+#+begin_src R :exports results :results graphics :file figs/HDDvCDD_points.png
+  ggplot(d2, aes(x = HDD30YR, y = CDD30YR)) +
+      geom_point()
+
+#+end_src
+
+#+RESULTS:
+[[file:figs/HDDvCDD_points.png]]
+
+#+begin_src R :exports results :results graphics :file figs/HDDvCDD_density.png
+  ggplot(d3, aes(x = HDD30YR, y = CDD30YR)) +
+      geom_density2d()
+
+#+end_src
+
+#+RESULTS:
+[[file:figs/HDDvCDD_density.png]]
+
+I need to annotate the cities on the above figure.  they clearly appear.
+
+#+begin_src R :exports results :results graphics :file figs/HDDvCDD_density_division.png
+  ggplot(d3, aes(x = HDD30YR, y = CDD30YR)) +
+      geom_density2d() +
+        geom_convexhull(aes(color = DIVISION, fill = DIVISION), alpha = 0, size = 1)
+#+end_src
+
+#+RESULTS:
+
+[[file:figs/HDDvCDD_density_division.png]]
+
+Division may not be so useful.  It's a bit of a clutter mess.
+
+Just identifying cities might be best.
+
+
+#+begin_src R
+    cities <- read.csv("data/cities_hdd_cdd.csv", stringsAsFactors = F) %>%
+      mutate(HDD30YR = hdd, CDD30YR = cdd) 
+
+  cities.head <- cities %>%
+    slice(c(1:10,83))  #83 is Madison, WI
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R :exports results :results graphics :file figs/cities_hdd_cdd.png
+  ggplot() +
+    geom_point(data = cities, aes(x = HDD30YR, y = CDD30YR, size = population))
+#+end_src
+
+#+RESULTS:
+[[file:figs/cities_hdd_cdd.png]]
+
+#+begin_src R
+cities.uncount <- cities %>% uncount(population/10000)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R :exports results :results graphics :file figs/cities_hdd_cdd_hex_logcount.png :width 800
+  ggplot() +
+    geom_hex(data = cities.uncount, aes(x = HDD30YR, y = CDD30YR), binwidth = 250) +
+    coord_equal() +
+    geom_text(data = cities.head, aes(x = HDD30YR, y = CDD30YR, label = city), size = 6) +
+      scale_fill_distiller(name = "Population (10,000)", trans = "log", palette = "YlOrBr", direction = 1) +
+    geom_abline(a = 1, alpha = .5)
+#+end_src
+
+#+RESULTS:
+[[file:figs/cities_hdd_cdd_hex_logcount.png]]
+
+6 of the top 10 cities have more cooling degree days than heating
+degree days.
+
+#+begin_src R
+sum(cities$population)
+#+end_src
+
+#+RESULTS:
+: [1] 131132443
+
+#+begin_src R
+cities %>% mutate(more_hdd = hdd > cdd) %>% head(15) %>% pull(more_hdd)
+cities.morehdd <- cities %>% mutate(more_hdd = hdd > cdd) %>% group_by(more_hdd) %>% summarize(sum(population)) %>% data.frame()
+cities.morehdd
+#+end_src
+
+#+RESULTS:
+:  [1]  TRUE FALSE  TRUE FALSE  TRUE FALSE FALSE FALSE FALSE  TRUE FALSE  TRUE
+: [13] FALSE  TRUE  TRUE
+:  
+:  more_hdd sum.population.
+: 1    FALSE        34573558
+: 2     TRUE        96558885
+
+#+begin_src R
+cities.morehdd$sum.population[2] / cities.morehdd$sum.population[1]
+#+end_src
+
+#+RESULTS:
+: [1] 2.792854
+
+** NEXT USE census to get nearly exact population that lives in more hdd than cdd places.!!!
+
+
+
+#+begin_src R :exports results :results graphics :file figs/HDDvCDD_density_wCities.png
+  ggplot(d3, aes(x = HDD30YR, y = CDD30YR)) +
+      geom_density2d() +
+    geom_point(data = cities)
+
+#+end_src
+
+#+RESULTS:
+[[file:figs/HDDvCDD_density_wCities.png]]
+
+
+#+begin_src R :exports results :results graphics :file figs/HDDvCDD_point_wCities.png
+  ggplot(d2, aes(x = HDD30YR, y = CDD30YR)) +
+      geom_point(color = "red") +
+    geom_text(data = cities, aes(label = city))
+
+#+end_src
+
+#+RESULTS:
+[[file:figs/HDDvCDD_point_wCities.png]]
+
+someone probably already done this: divide cdd and hdd space with
+lines for whether trees should be planted or not.
+- this could be done with modelling.
+
+
